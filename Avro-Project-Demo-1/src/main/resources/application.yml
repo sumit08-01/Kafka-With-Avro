@@ -1,0 +1,16 @@
+server:
+  port: 8083
+
+
+spring:
+  application:
+    name: Avro-Project-Demo-1
+
+#  kafka:
+#    producer:
+#      bootstrap-server: localhost:9092
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+
+

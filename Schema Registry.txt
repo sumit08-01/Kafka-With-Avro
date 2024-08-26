@@ -1,0 +1,146 @@
+Website of Sechem registry --> https://docs.confluent.io/platform/current/schema-registry/index.html
+
+What is Schema --> A schema defines the structure of message data. It defines allowed data types, 
+their format, and relationships. A schema acts as a blueprint for data, describing the structure of data records,
+the data types of individual fields, the relationships between fields, and any constraints or rules that apply 
+to the data.
+OR 
+A schema is a blueprint that define the structure of the data, like the types of the fields in a record. It
+ensures that both producers and consumers of data understand and agree on the data format.
+
+Schema Registry ---> 
+It's an open source project maintained by Confluent.
+Schema Registry provides a centralized repository for managing and validating schemas for topic message data, 
+and for serialization and deserialization of the data over the network.
+OR
+Schema registry is a service that stores and manages the schemas for data serialization and deserialization.
+
+why is schema registry needed?
+In the systems uses data serialization format like Avro, Protobuf or Json, the data send between producers and
+consumers needs to have a consistent structure. The schema registry ensures that both producers and consumers
+agree on the structure of data, reducing the chances of errors caused by mismatched data formats.
+Producers and consumers are decoupled and they exchange data using the Kafka Broker But the consumer is 
+indirectly coupled to producer to understand the data format Anytime business requirements change data may be
+needed to change
+
+Features and benefits/Advantages ---> 
+Schema Registry helps improve reliability, flexibility, and scalability of systems and applications by providing
+a standard way to manage and validate schemas used by producers and consumers.
+1-> Centralized schema management and storage, which makes it easier to track and maintain different versions of
+schemas used by various producers and consumers.
+2-> Schema ID validation, which means Schema Registry validates the structure and compatibility of schemas. 
+This ensures that topic message data conforms to a standard format and is error-free, reducing the risk of data 
+loss or corruption.
+3-> Compatibility checking of schemas between producers and consumers to ensure that message data can be 
+consumed by different applications and systems without resulting in errors or data loss due to message formatting.
+4-> Versioning of schemas, which allows for updates to schemas without breaking compatibility with existing data.
+This provides a smooth transition to new versions of a schema with continued support for legacy data, 
+and reduces the need for expensive and time-consuming data migration.
+
+Kafka Architecture with Schema Registry ---> 
+In the PDF--> 
+steps --> 
+1-> Producer send schema to the schema registry first, then schema registry return a schemaVersionID to the producer.
+2-> Then Producer send data to the kafka broker with the same format that define in the schema. And send this (schemaVersionID + data).
+3-> Then the consumer consume the message form the kafka broker, and get the (schemaVersionID + data).
+4-> Then the consumer send the schemaVersionID to the scheme registry to get the schema format, if available.
+5-> Then Record Processed Successfully.
+Both producers and consumers are attached with the schema registry.
+Compatibility of the new record is validated with the schema that’s returned
+AVRO record is lighter because there is no schema present in every record
+
+Command to run Confluent Kafka/Schema Registry and Control Center. 
+git clone https://github.com/confluentinc/cp-all-in-one && cd cp-all-in-one && git checkout 6.0.1-post && cd cp-all-in-one && git checkout 6.0.1-post && docker-compose up -d
+
+How to use or start schema registry ---> 
+official website --> https://docs.confluent.io/platform/current/schema-registry/schema_registry_onprem_tutorial.html
+
+Steps --> 
+This is for producer API
+1--> You hava to start the zookeeper, kafka broker, and also schema registry service
+For this create a docker-compose.yml file and create services and run.
+To find the docker-compose file goto this github --> https://raw.githubusercontent.com/dilipsundarraj1/kafka-for-developers-using-schema-registry/main/docker-compose.yaml
+check your all service up or not using command --> docker-compose up
+if any of services is not up then use --> docker-compose down and then again start using the above command
+
+2--> Check all the service are up and run, by this command --> docker ps
+3--> Then go to this server --> http://localhost:9021/clusters
+4--> Create a simple spring boot project and dependency according to you and then after we start adding 
+avro-kafka dependency and plugins in the pom.xml file.
+5--><repositories>
+		<repository>
+			<id>confluent</id>
+			<url> https://packages.confluent.io/maven/ </url>
+		</repository>
+	</repositories>
+Add the above repositorie because avro-kafka-serializiler dependency is not present in maven
+<!--Kafka and Avro related dependency-->
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.avro/avro -->
+		<dependency>
+			<groupId>org.apache.avro</groupId>
+			<artifactId>avro</artifactId>
+			<version>1.12.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.confluent/kafka-avro-serializer -->
+		<dependency>
+			<groupId>io.confluent</groupId>
+			<artifactId>kafka-avro-serializer</artifactId>
+			<version>7.5.2</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.17.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+Add the above dependency too.
+<plugins>
+
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.avro</groupId>
+				<artifactId>avro-maven-plugin</artifactId>
+				<version>1.11.1</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>schema</goal>
+						</goals>
+						<configuration>
+							<sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
+							<outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>17</source>
+					<target>17</target>
+				</configuration>
+			</plugin>
+		</plugins>
+Add the above plugin too. 

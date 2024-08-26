@@ -1,0 +1,22 @@
+
+server:
+  port: 8071
+
+
+spring:
+  kafka:
+    bootstrap-servers: "127.0.0.1:9092"
+    producer:
+      keySerializer: "org.apache.kafka.common.serialization.StringSerializer"
+      valueSerializer: "io.confluent.kafka.serializers.KafkaAvroSerializer"
+      properties:
+        schema:
+          registry:
+            url: "http://127.0.0.1:8081"
+
+
+topic:
+  name: avro_topic
+  partition: 1
+  replicationFactor: 1
+

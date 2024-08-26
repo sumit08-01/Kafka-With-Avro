@@ -1,0 +1,16 @@
+
+
+spring:
+  application:
+    name: consumerAvroV1
+  kafka:
+    bootstrap-servers: 127.0.0.1:9092
+    consumer:
+      group-id: my-group
+      auto-offset-reset: earliest
+      properties:
+        schema.registry.url: http://127.0.0.1:8081
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+topic:
+  name: avro_topic

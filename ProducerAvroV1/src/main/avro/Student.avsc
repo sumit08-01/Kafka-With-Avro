@@ -1,0 +1,22 @@
+{
+  "name": "Student",
+  "namespace": "com.producer.avro.classes",
+  "type": "record",
+  "fields": [
+    {
+      "name": "id",
+      "type": "int"
+//      "default": "1"
+    },
+    {
+      "name": "studentName",
+      "type": "string",
+      "default": "sumit"
+    },
+    {
+      "name": "age",
+      "type": "int"
+//      "default": "34"
+    }
+  ]
+}
