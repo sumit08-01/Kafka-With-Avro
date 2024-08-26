@@ -144,3 +144,67 @@ Add the above dependency too.
 			</plugin>
 		</plugins>
 Add the above plugin too. 
+
+6--> Add the below properties in the properties.yml file
+spring:
+  kafka:
+    bootstrap-servers: "127.0.0.1:9092"
+    producer:
+      keySerializer: "org.apache.kafka.common.serialization.StringSerializer"
+      valueSerializer: "io.confluent.kafka.serializers.KafkaAvroSerializer"
+      properties:
+        schema:
+          registry:
+            url: "http://127.0.0.1:8081"
+topic:
+  name: avro_topic
+  partition: 1
+  replicationFactor: 1
+
+7--> Create a avro schema 
+8--> Create a kafak config file and create these methods in that file
+ @Bean // this is for converting avro to json
+    public HttpMessageConverter<GenericRecord> avroHttpMessageConverter() {
+        return new AvroHttpMessageConverter();
+    }
+    @Bean // this is for topic creation
+    public NewTopic createTopic(){
+        return new NewTopic(topicName, partition,rf);
+    }
+9--> public class AvroHttpMessageConverter implements HttpMessageConverter<GenericRecord>; 
+create this java file too for the above above configuration.
+10--> Now create controller, service, model and send the data to the kafka.
+
+For consumer  --> 
+Steps --> 
+1--> Create a spring boot project and add the above dependency in this project.
+2--> Now add the below properties in the .yml file in the consumer 
+
+spring:
+  application:
+    name: consumerAvroV1
+  kafka:
+    bootstrap-servers: 127.0.0.1:9092
+    consumer:
+      group-id: my-group
+      auto-offset-reset: earliest
+      properties:
+        schema.registry.url: http://127.0.0.1:8081
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+topic:
+  name: avro_topic
+
+3--> Create a avro schema for the consumer same as producer.
+4--> Create a model and service layer for getting the data form the kafka producer 
+@KafkaListener(topics = "${topic.name}", groupId = "${spring.kafka.consumer.group-id}")
+    public void listen(GenericRecord record) {
+        // Convert GenericRecord to your Avro class if needed
+        System.out.println("Received record: " + record);
+        Student student = new Student();
+        student.setId((Integer) record.get("id"));
+        student.setStudentName((CharSequence) record.get("studentName"));
+        student.setAge((Integer) record.get("age"));
+        System.out.println("Student : --> " + student);
+	}
+All that is.
